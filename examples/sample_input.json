@@ -1,0 +1,20 @@
+{
+  "v_plan": 1.0,
+  "state": {
+    "v_ego": 1.0,
+    "d_ego": 4.0,
+    "v_peer": 0.8,
+    "d_peer": 2.0,
+    "peer_intent": 1,
+    "lease_status": 0,
+    "priority_diff": 0,
+    "payload_kg": 10,
+    "msg_age_ms": 60,
+    "a_max": 0.9,
+    "robot_len": 0.8,
+    "d_safe": 0.3,
+    "loc_age_s": 0.5,
+    "heartbeat_ok": 1,
+    "blocked_edge": 0
+  }
+}

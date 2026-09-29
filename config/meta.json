@@ -1,0 +1,25 @@
+{
+  "features": [
+    "v_ego",
+    "d_ego",
+    "v_peer",
+    "d_peer",
+    "peer_intent",
+    "lease_status",
+    "priority_diff",
+    "payload_kg",
+    "msg_age_ms",
+    "a_max",
+    "robot_len",
+    "d_safe",
+    "loc_age_s",
+    "heartbeat_ok",
+    "blocked_edge",
+    "d_stop",
+    "stop_margin",
+    "t_ego_kin",
+    "t_peer_clear_kin",
+    "t_gap"
+  ],
+  "conflict_threshold": 0.13
+}
