@@ -1,0 +1,26 @@
+{
+  "members": ["R1", "R2", "R3"],
+  "seed": 26123,
+  "bid_window": 0.4,
+  "confirm_timeout": 0.4,
+  "heartbeat_interval": 0.2,
+  "heartbeat_timeout": 0.8,
+  "stall_timeout": 1.0,
+  "retry_count": 2,
+  "retry_backoff": 0.3,
+  "announcement_radius": 2,
+  "radius_step": 2,
+  "reassignment_limit": 5,
+  "battery_reserve": 5.0,
+  "lease_seconds": 3.0,
+  "clock_skew_bound": 0.05,
+  "proposal_timeout": 0.6,
+  "weights": {"travel": 1.0, "queue": 2.0, "battery": 3.0, "congestion": 1.0},
+  "graph": {"A": {"B": 1.0, "D": 2.0}, "B": {"A": 1.0, "C": 1.0}, "C": {"B": 1.0, "D": 1.0}, "D": {"A": 2.0, "C": 1.0}},
+  "robots": {
+    "R1": {"node": "A", "battery": 40, "capacity": 10},
+    "R2": {"node": "B", "battery": 60, "capacity": 10},
+    "R3": {"node": "D", "battery": 80, "capacity": 10}
+  },
+  "tasks": [{"task_id": "T1", "pickup": "A", "target": "C", "priority": 10, "deadline": 1000000000000, "payload": 2, "carrying_cargo": false, "task_type": "delivery"}]
+}

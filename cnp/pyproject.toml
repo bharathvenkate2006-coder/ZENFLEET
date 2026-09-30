@@ -1,0 +1,25 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "decentralized-cnp"
+version = "0.1.0"
+description = "ZenFleet task reassignment: decentralized Contract Net bidding with quorum ownership leases"
+requires-python = ">=3.11"
+dependencies = []
+
+[project.optional-dependencies]
+zenoh = ["eclipse-zenoh>=1.0,<2"]
+models = ["lightgbm==4.7.0", "scikit-learn==1.8.0", "pandas", "joblib", "numpy"]
+dev = ["pytest>=8,<9"]
+
+[project.scripts]
+cnp-demo = "bidding.demo_scenarios:main"
+cnp-robot = "bidding.runtime:main"
+
+[tool.setuptools.packages.find]
+include = ["bidding*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

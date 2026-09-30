@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>CNP auction monitor</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+body{background:#101725;color:#e8edf5;font:15px system-ui;margin:2rem}button,select,input{padding:.6rem;margin:.3rem;background:#24344d;color:white;border:1px solid #7186a4;border-radius:5px}section{background:#192438;padding:1rem;margin:1rem 0;border-radius:8px}table{border-collapse:collapse;width:100%}th,td{text-align:left;border-bottom:1px solid #40506a;padding:.5rem}pre{white-space:pre-wrap;max-height:32rem;overflow:auto}h1{font-size:1.6rem}.note{color:#b3c7e3}
+</style></head><body><h1>Decentralized CNP · simulation monitor</h1>
+<p class="note">Simulation controls only. No robot actuation. Protocol runtime writes separate snapshots.</p>
+<section><select id="scenario"></select><button id="reset">Reset scenario</button>
+<button data-action="block">Block A–B</button><button data-action="clear">Clear A–B</button>
+<select id="robot"><option>R1</option><option>R2</option><option>R3</option></select>
+<button data-action="kill">Kill selected robot</button><button data-action="drain">Drain battery</button>
+<button data-action="split">Split R1 / R2,R3</button><button data-action="heal">Heal partition</button>
+<label>Drop <input id="drop" type="number" min="0" max="1" step=".05" value="0"></label>
+<label>Delay seconds <input id="delay" type="number" min="0" max="5" step=".1" value=".015"></label>
+<button data-action="network">Apply network faults</button></section>
+<section><h2>Metrics</h2><pre id="metrics"></pre></section>
+<section><h2>Auctions and bids</h2><table><thead><tr><th>Peer</th><th>Task / epoch</th><th>State</th><th>Winner</th><th>Cost breakdown</th></tr></thead><tbody id="auctions"></tbody></table></section>
+<section><h2>Ownership, routes, blocked edges</h2><pre id="ledger"></pre></section>
+<section><h2>Timeline</h2><pre id="timeline"></pre></section>
+<script>
+const $=id=>document.getElementById(id);
+async function command(action){await fetch('/control',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action,scenario:$('scenario').value,robot:$('robot').value,drop:Number($('drop').value),delay:Number($('delay').value)})});}
+$('reset').onclick=()=>command('reset');document.querySelectorAll('[data-action]').forEach(b=>b.onclick=()=>command(b.dataset.action));
+async function poll(){try{const s=await(await fetch('/state')).json();if(!$('scenario').options.length)s.scenarios.forEach(x=>$('scenario').add(new Option(x,x)));$('metrics').textContent=JSON.stringify(s.metrics,null,2);$('auctions').replaceChildren();s.nodes.forEach(n=>n.auctions.forEach(a=>{const tr=document.createElement('tr');[n.robot,a.task_id+' / '+a.epoch,a.state,a.winner||'—',JSON.stringify(a.bids)].forEach(v=>{const td=document.createElement('td');td.textContent=v;tr.appendChild(td)});$('auctions').appendChild(tr)}));$('ledger').textContent=JSON.stringify(s.nodes.map(n=>({robot:n.robot,ledger:n.ledger,routes:n.routes,blocked_edges:n.blocked_edges})),null,2);$('timeline').textContent=s.events.map(e=>JSON.stringify(e)).join('\n')}catch(e){$('metrics').textContent=String(e)}setTimeout(poll,250)}poll();
+</script></body></html>

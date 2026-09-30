@@ -1,0 +1,51 @@
+{
+  "members": ["R1", "R2", "R3"],
+  "seed": 26123,
+  "sim_seconds": 45,
+  "execution_speed": 1.0,
+  "bid_window": 0.4,
+  "confirm_timeout": 0.4,
+  "heartbeat_interval": 0.2,
+  "heartbeat_timeout": 0.8,
+  "stall_timeout": 1.0,
+  "fallback_timeout": 2.0,
+  "retry_count": 2,
+  "retry_backoff": 0.3,
+  "announcement_radius": 3,
+  "radius_step": 2,
+  "reassignment_limit": 5,
+  "battery_reserve": 5.0,
+  "lease_seconds": 3.0,
+  "clock_skew_bound": 0.05,
+  "proposal_timeout": 0.6,
+  "weights": {"travel": 1.0, "queue": 2.0, "battery": 10.0, "congestion": 1.5},
+  "graph": {
+    "A": {"B": 4.0, "D": 3.0},
+    "B": {"A": 4.0, "C": 4.0, "E": 3.0},
+    "C": {"B": 4.0, "F": 3.0},
+    "D": {"A": 3.0, "E": 4.0},
+    "E": {"D": 4.0, "F": 4.0, "B": 3.0},
+    "F": {"E": 4.0, "C": 3.0}
+  },
+  "junctions": ["B", "E"],
+  "energy": {
+    "capacity_wh": 100.0,
+    "robot_mass_kg": 15.0,
+    "c0": 0.06,
+    "c1": 0.004,
+    "c2": 0.03,
+    "cruise_speed": 0.8,
+    "reserve_percent": 10.0,
+    "safety_factor": 1.25,
+    "a_max_empty": 1.0
+  },
+  "predictor": {"enabled": true, "use_models": true, "use_congestion": true, "buffer_s": 0.5},
+  "robots": {
+    "R1": {"node": "A", "battery": 45, "capacity": 10, "speed": 0.0, "intent_route": [], "priority": 1},
+    "R2": {"node": "F", "battery": 70, "capacity": 10, "speed": 0.8, "intent_route": ["F", "E", "D"], "priority": 1},
+    "R3": {"node": "D", "battery": 85, "capacity": 10, "speed": 0.0, "intent_route": [], "priority": 1}
+  },
+  "tasks": [{"task_id": "T1", "pickup": "E", "target": "F", "priority": 10,
+             "deadline": 1000000000000, "payload": 2, "carrying_cargo": false,
+             "task_type": "delivery", "initial_owner": "R1"}]
+}

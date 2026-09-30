@@ -11,8 +11,9 @@ sits inside each robot and helps it decide how fast to approach a shared junctio
 
 Instead of the usual stop-and-wait rule, where a robot halts completely and then accelerates
 again, each robot works out when the other one will clear the junction and eases off just enough to
-arrive right after. That saves the time a full stop would cost, which is where we expect the
-20% improvement over the baseline to come from.
+arrive right after. The aim is to save the time a full stop would cost. **The traffic simulation
+in `traffic/` did not show that saving yet** (see "Where things stand" and
+`traffic/docs/RESULTS.md`): the robots stop far less, but tasks do not finish sooner.
 
 ## What the model predicts
 
@@ -34,8 +35,33 @@ lower the speed, never raise it:
 - Junction lease not granted: the speed is capped so the robot can always stop before the junction.
 - The command never exceeds the planned speed.
 
-So zero collisions is guaranteed by the lease and stopping-distance rules, not by the ML model.
+The design intent is that the lease and stopping-distance rules, not the ML model, keep the fleet
+collision-free. In the traffic simulation there were 0 collisions in 390 runs, which is consistent
+with that, but it is a simulation result: the lease there is an abstract arbiter.
 The model's job is to make the fleet faster and smoother.
+
+## When a robot can't finish its job (cnp/)
+
+The `cnp/` folder handles task reassignment. Robots announce a stuck job, bid for it, and the winner
+needs a majority of the fleet to approve before it starts, so two robots never own the same task.
+The bids use the trained models here: a robot whose route runs into another robot at a junction bids
+higher, using the Q50/Q90 clearing times and conflict probability, and a robot without enough range
+declines. If the speed controller reports a fallback that does not clear, the robot hands its task
+over. See [`cnp/README.md`](cnp/README.md) and [`cnp/docs/RESULTS.md`](cnp/docs/RESULTS.md).
+
+## Where things stand
+
+| Piece | Status |
+|---|---|
+| Junction clearing-time and conflict models | Trained on simulated data, tested on an unseen layout |
+| Safety layer (stopping limit, stale data, blocked edge) | Implemented, 6 tests |
+| Task reassignment (CNP bidding, quorum ownership) | Implemented and simulated, 57 tests |
+| Model-aware bids (junction delay from the trained models) | Working in simulation |
+| Range and energy for bids | A physics formula, not a trained model |
+| Zenoh networking code | Written, not yet run on a real Zenoh network |
+| Multi-robot traffic simulation vs stop-and-wait (`traffic/`) | Built. 0 collisions in 390 runs, but predictive was **not faster**: +0.1% to +3.9% task time. The 20% target is not supported |
+| Live fleet dashboard (positions, battery) | Not built yet. `cnp/` has an auction and fault-injection panel only |
+| 3-robot hardware demo | Not done yet |
 
 ## About the data (please read)
 
@@ -136,6 +162,8 @@ models/     ttc_q50.pkl, ttc_q90.pkl, conflict_clf.pkl    trained LightGBM model
 config/     meta.json                                     feature list and conflict threshold
 src/        predict.py, speed_controller.py               inference and safety layer
             generate_dataset.py, train_model.py           regenerate data and retrain
+cnp/        task reassignment: bidding, ownership leases, simulator, examples, docs
+tests/      safety-layer tests
 examples/   sample_input.json
 ```
 
@@ -156,7 +184,11 @@ The trained files were saved with LightGBM 4.7.0 and scikit-learn 1.8.0, which a
 2. Run the model inside the full simulation and measure collisions and completion time against
    stop-and-wait.
 3. Tune the caution settings (buffer time and risk weight) so the robot slows down less often.
-4. Add battery and range prediction for the task-reassignment auction.
+4. Replace the physics range formula in `cnp/config_zenfleet.json` with a model trained on real battery logs.
+5. (Done, see `traffic/`.) The result was no speed-up, so the next job is to find out why: robots
+   ease off early, and the time saved from stopping is spent driving slowly. Ideas are in
+   `traffic/docs/RESULTS.md`.
+6. Run the Zenoh code on the three robots.
 
 ## License
 

@@ -1,0 +1,56 @@
+
+    A ---4--- B ---4--- C          B and E are the shared junctions.
+    |         |         |          Numbers are edge lengths in metres.
+    3         3         3
+    |         |         |
+    D ---4--- E ---4--- F
+
+==============================================================================
+Example 1: the nearest robot would run into traffic
+R1 has a motor fault, so R2 and R3 bid. R3 is a hair cheaper on distance alone,
+but R2 is about to drive through junction E.
+   R3 bids  18.09  (trip 10.0 s, junction delay 5.3 s, range left 510 m, conflict risk 0.64)
+        junction E: R2 is coming too. Q50 clear 8.12 s, Q90 clear 12.72 s, wait 8.22 s
+   R1 declines: fault_or_capacity
+   R2 bids  10.20  (trip 10.0 s, junction delay 0.0 s, range left 408 m, conflict risk 0.00)
+   -> winner R2, task done in 8.58 s
+   Same situation with the junction prediction switched off: winner R3 (its route crosses R2 at junction E, so it would have to wait there).
+==============================================================================
+
+Example 2: a robot that is close but nearly out of battery
+R3 is right next to the pickup but has 11% battery, with a 10% reserve.
+   R3 declines: insufficient_range
+   R1 bids  16.45  (trip 13.8 s, junction delay 1.5 s, range left 238 m, conflict risk 0.33)
+        junction E: R2 is coming too. Q50 clear 8.08 s, Q90 clear 12.75 s, wait 4.5 s
+   R2 bids  10.20  (trip 10.0 s, junction delay 0.0 s, range left 408 m, conflict risk 0.00)
+   -> winner R2, task done in 8.58 s
+==============================================================================
+
+Example 3: the speed controller reports a fallback that does not clear
+The owner loses fresh peer data. A short glitch is ignored; this one lasts.
+   t= 0.30s  R1  announces task blocked_path
+   t= 0.76s  R1  awards task to R2
+   t= 1.30s  R2  safety layer reports fallback
+   t= 3.32s  R2  announces task safety_fallback
+   t= 3.78s  R2  awards task to R1
+   t= 4.80s  R2  awards task to R3
+   t= 5.84s  R2  announces task robot_fault
+   t= 6.30s  R2  announces task robot_fault
+   t= 6.76s  R2  announces task robot_fault
+   t= 7.22s  R2  announces task robot_fault
+   t= 7.68s  R2  awards task to R1
+   t=18.80s  R1  finishes the task
+   -> new owner R1, task done in 18.5 s (no duplicate execution: True)
+==============================================================================
+
+Example 4: the robot holding the task dies
+Its peers notice the missing heartbeat and auction the task themselves.
+   t= 0.30s  R1  announces task blocked_path
+   t= 0.76s  R1  awards task to R2
+   t= 1.30s  R2  robot killed
+   t= 3.90s  R1  announces task owner_lost_or_lease_expired
+   t= 4.36s  R1  awards task to R3
+   t=12.48s  R3  finishes the task
+   -> CNP: done in 12.18 s by R3. Without reassignment: never finished.
+
+Prediction source used for the bids above: lightgbm
